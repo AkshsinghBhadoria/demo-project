@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bank App</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --card: #12121a;
+    --border: #1e1e2e;
+    --green: #00e676;
+    --red: #ff1744;
+    --blue: #448aff;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .container {
+    width: 420px;
+    padding: 20px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .header .bank-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    letter-spacing: 4px;
+    color: var(--green);
+  }
+
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .balance-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .balance-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--green), var(--blue));
+  }
+
+  .balance-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .balance-amount {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 2px;
+    line-height: 1;
+    transition: all 0.4s ease;
+  }
+
+  .balance-amount span { font-size: 28px; color: var(--muted); margin-right: 4px; }
+  .balance-amount.green { color: var(--green); }
+  .balance-amount.red   { color: var(--red); }
+
+  .input-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: border-color 0.3s;
+  }
+
+  .input-box:focus-within { border-color: var(--green); }
+
+  .input-box .rupee { font-size: 20px; color: var(--muted); }
+
+  .input-box input {
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 22px;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 2px;
+    width: 100%;
+  }
+
+  .input-box input::placeholder { color: var(--border); }
+
+  .buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  button {
+    padding: 16px 10px;
+    border: none;
+    border-radius: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  button:active { transform: scale(0.97); }
+
+  .btn-deposit  { background: rgba(0,230,118,0.12); color: var(--green); border: 1px solid rgba(0,230,118,0.25); }
+  .btn-withdraw { background: rgba(255,23,68,0.12);  color: var(--red);   border: 1px solid rgba(255,23,68,0.25); }
+  .btn-balance  { background: rgba(68,138,255,0.12); color: var(--blue);  border: 1px solid rgba(68,138,255,0.25); }
+
+  .btn-icon { display: block; font-size: 20px; margin-bottom: 6px; }
+
+  .msg-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  .msg-box.show  { opacity: 1; transform: translateY(0); }
+  .msg-box.success { border-color: rgba(0,230,118,0.3); }
+  .msg-box.error   { border-color: rgba(255,23,68,0.3); }
+  .msg-box.info    { border-color: rgba(68,138,255,0.3); }
+
+  .msg-icon { font-size: 20px; }
+  .msg-text  { font-size: 14px; font-weight: 500; color: var(--text); }
+
+  .history { margin-top: 20px; }
+
+  .history-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 160px;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .history-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .h-type { color: var(--muted); }
+  .h-amt.plus  { color: var(--green); font-weight: 600; }
+  .h-amt.minus { color: var(--red);   font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="bank-name">NovaBank</div>
+    <p>Your Personal Wallet</p>
+  </div>
+
+  <div class="balance-card">
+    <div class="balance-label">Current Balance</div>
+    <div class="balance-amount" id="balanceDisplay">
+      <span>₹</span><span id="balanceNum">1000</span>
+    </div>
+  </div>
+
+  <div class="input-box">
+    <span class="rupee">₹</span>
+    <input type="number" id="amountInput" placeholder="0" min="1" />
+  </div>
+
+  <div class="buttons">
+    <button class="btn-deposit"  onclick="deposit()">
+      <span class="btn-icon">＋</span>Deposit
+    </button>
+    <button class="btn-withdraw" onclick="withdraw()">
+      <span class="btn-icon">－</span>Withdraw
+    </button>
+    <button class="btn-balance"  onclick="checkBalance()">
+      <span class="btn-icon">◎</span>Balance
+    </button>
+  </div>
+
+  <div class="msg-box" id="msgBox">
+    <span class="msg-icon" id="msgIcon"></span>
+    <span class="msg-text"  id="msgText"></span>
+  </div>
+
+  <div class="history">
+    <div class="history-label">Transactions</div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+</div>
+
+<script>
+
+  let balance = 1000;
+
+  function showMsg(type, icon, text) {
+    const box = document.getElementById('msgBox');
+    const ico = document.getElementById('msgIcon');
+    const txt = document.getElementById('msgText');
+    box.className = 'msg-box';
+    void box.offsetWidth;
+    ico.textContent = icon;
+    txt.textContent = text;
+    box.classList.add('show', type);
+  }
+
+  function updateBalance(newBal, flash) {
+    balance = newBal;
+    const el = document.getElementById('balanceDisplay');
+    document.getElementById('balanceNum').textContent = balance;
+    el.className = 'balance-amount ' + flash;
+    setTimeout(() => { el.className = 'balance-amount'; }, 800);
+  }
+
+  function addHistory(type, amount) {
+    const list = document.getElementById('historyList');
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    const isPlus = type === 'Deposit';
+    item.innerHTML = `
+      <span class="h-type">${type}</span>
+      <span class="h-amt ${isPlus ? 'plus' : 'minus'}">${isPlus ? '+' : '-'}₹${amount}</span>
+    `;
+    list.insertBefore(item, list.firstChild);
+  }
+
+  function getAmount() {
+    const val = parseFloat(document.getElementById('amountInput').value);
+    if (!val || val <= 0) {
+      showMsg('error', '⚠️', 'Please enter a valid amount!');
+      return null;
+    }
+    return val;
+  }
+
+  function deposit() {
+    const amount = getAmount();
+    if (amount === null) return;
+    updateBalance(balance + amount, 'green');
+    addHistory('Deposit', amount);
+    showMsg('success', '✅', amount + ' rupaye jama ho gaye! Balance: ₹' + balance);
+    document.getElementById('amountInput').value = '';
+  }
+
+  function withdraw() {
+    const amount = getAmount();
+    if (amount === null) return;
+    if (amount > balance) {
+      showMsg('error', '❌', 'Insufficient Balance! Available: ₹' + balance);
+      return;
+    }
+    updateBalance(balance - amount, 'red');
+    addHistory('Withdraw', amount);
+    showMsg('success', '✅', amount + ' rupaye nikal gaye! Balance: ₹' + balance);
+    document.getElementById('amountInput').value = '';
+  }
+
+  function checkBalance() {
+    showMsg('info', '💰', 'Aapka current balance hai: ₹' + balance);
+  }
+
+</script>
+</body>
+</html>
